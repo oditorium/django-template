@@ -1,0 +1,119 @@
+#! /bin/bash
+export PRJ=BlockchainProject
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # the script directory
+PYTHON=/usr/bin/python3
+export DJANGO=/usr/local/lib/python3.4/dist-packages/django
+export BASE=$DIR
+export PRJFULL=$BASE/$PRJ
+export DJANGO_SETTINGS_MODULE=$PRJ.settings
+export DJANGO_DEBUG=1
+
+CERTS=/etc/apache2/certs/mycerts
+
+PORT=8000
+HOST=localhost
+
+
+cd $DIR
+
+case $1 in
+
+
+    #######  run servers  #####
+
+    80)
+        echo "starting the server on *:80"
+        export DJANGO_USE_SQLITE=1
+        export DJANGO_DEBUG=0
+        $PYTHON $DIR/manage.py runserver 0.0.0.0:80
+        ;;
+
+    443|ssl|https)
+        echo "starting the server on *:443"
+        export DJANGO_USE_SQLITE=1
+        export DJANGO_DEBUG=0
+        $PYTHON manage.py runsslserver --certificate $CERTS.crt --key $CERTS.key 0.0.0.0:443
+        ;;
+
+    l8000|"")
+        echo "starting the server on localhost:8000"
+        export DJANGO_DEBUG=1
+        export DJANGO_USE_SQLITE=1
+        $PYTHON $DIR/manage.py runserver localhost:8000
+        ;;
+
+    8000)
+        echo "starting the server on *:8000"
+        export DJANGO_USE_SQLITE=1
+        $PYTHON $DIR/manage.py runserver 0.0.0.0:8000
+        ;;
+
+    8080)
+        echo "starting the server on *:8080"
+        export DJANGO_USE_SQLITE=1
+        export DJANGO_DEBUG=0
+        $PYTHON $DIR/manage.py runserver 0.0.0.0:8080
+        ;;
+
+    8443)
+        echo "starting the server on *:443"
+        export DJANGO_USE_SQLITE=1
+        $PYTHON manage.py runsslserver --certificate $CERTS.crt --key $CERTS.key 0.0.0.0:8443
+        ;;
+
+
+
+    #######  other shortcuts  #####
+
+    makemigrations|mm)
+        $PYTHON manage.py makemigrations
+        ;;
+
+    migrate|m)
+        export DJANGO_USE_SQLITE=1
+        $PYTHON manage.py migrate
+        ;;
+
+    migratep|mp)
+        $PYTHON manage.py migrate
+        ;;
+
+    migrateall|mmm)
+        export DJANGO_USE_SQLITE=1
+        $PYTHON manage.py makemigrations
+        $PYTHON manage.py migrate
+        ;;
+
+    shell|s)
+        $PYTHON manage.py shell
+        ;;
+
+    collectstatic|cs)
+        $PYTHON manage.py collectstatic --clear
+        ;;
+
+    createsuperuser|csu)
+        export DJANGO_USE_SQLITE=1
+        $PYTHON manage.py createsuperuser
+        ;;
+
+    startapp|app)
+        $PYTHON manage.py startapp
+        ;;
+
+
+    #######  shell shortcuts  #####
+
+    apacherestart|apr)
+        service apache2 restart
+        ;;
+
+    #######  run python scripts  #####
+
+
+    #######  technical  #####
+    *)
+        echo "Command '$1' not recognised"
+
+esac
